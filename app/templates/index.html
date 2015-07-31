@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>Stuff</title>
+</head>
+<body>
+  <h1>Old Stuff</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Stuff</th>
+        <th>Things</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for junk in old_stuff %}
+    <tr>
+    <td>{{ junk.stuff }}</td>
+    <td>{{ junk.things }}</td>
+    </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+  <h1>New Stuff</h1>
+  <form method="POST" action="/">
+    {{ form.hidden_tag() }}
+    <div>{{ form.stuff.label }} {{ form.stuff(size=20) }}</div>
+    <div>{{ form.things.label }} {{ form.things() }}</div>
+    {{ form.submit() }}
+  </form>
+</body>
+</html>
