@@ -3,7 +3,7 @@
 <title>Stuff</title>
 </head>
 <body>
-  <h1>Old Stuff</h1>
+  <h1>Stuff</h1>
   <table>
     <thead>
       <tr>
@@ -12,7 +12,7 @@
       </tr>
     </thead>
     <tbody>
-  {% for junk in old_stuff %}
+  {% for junk in stuff %}
     <tr>
     <td>{{ junk.stuff }}</td>
     <td>{{ junk.things }}</td>
@@ -20,8 +20,8 @@
   {% endfor %}
     </tbody>
   </table>
-  <h1>New Stuff</h1>
-  <form method="POST" action="/">
+  <h1>Add New Stuff</h1>
+  <form method="POST" action="{{ url_for('main.index') }}">
     {{ form.hidden_tag() }}
     <div>{{ form.stuff.label }} {{ form.stuff(size=20) }}</div>
     <div>{{ form.things.label }} {{ form.things() }}</div>

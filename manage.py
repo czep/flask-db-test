@@ -1,19 +1,12 @@
 #!/usr/bin/env python
 
 import os
-
-if os.path.exists('.env'):
-    print('manage.py - Importing environment from .env...')
-    for line in open('.env'):
-        var = line.strip().split('=')
-        if len(var) == 2:
-            os.environ[var[0]] = var[1]
-            
+   
 from app import create_app, db
 from app.models import Stuff
 from flask.ext.script import Manager, Shell
 
-app = create_app(os.getenv('APP_CONFIG') or 'development')
+app = create_app()
 manager = Manager(app)
 
 def make_shell_context():
@@ -28,3 +21,4 @@ def init_database():
 
 if __name__ == '__main__':
     manager.run()
+    

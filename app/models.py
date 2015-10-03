@@ -8,3 +8,4 @@ class Stuff(db.Model):
     
     def __repr__(self):
         return '<Stuff %r: %r>' % (self.stuff, self.things)
+        
