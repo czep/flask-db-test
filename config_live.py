@@ -1,1 +1,1 @@
-local/config_dev.py
+local/config_sqlite.py
