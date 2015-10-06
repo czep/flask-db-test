@@ -1,11 +1,11 @@
 # flask-db-test
 Basic flask web app for testing database configurations.
 
-This is a basic web app for quickly switching between different database configurations to test a flask deployment.  The app exposes a single database model allowing you to test the ability to read from and write to a database table.  For a lengthier explanation, please read [this blog post](http://czep.net/).
+This is a basic web app for quickly switching between different database configurations to test a flask deployment.  The app exposes a single database model allowing you to test the ability to read from and write to a database table.  For a lengthier explanation, please read [this blog post](http://czep.net/15/adventures-with-flask.html).
 
 # Install
 
-Assuming CentOS 7, Apache, and mod_wsgi.  For other deployment environments read the docs, fancy pants.
+Assuming CentOS 7, Apache, and mod_wsgi.  For other deployment environments read the docs, fancy pants!
 
     sudo yum -y update
     sudo yum install vim httpd python python-devel python-virtualenv httpd-devel mod_wsgi
@@ -31,13 +31,32 @@ Prepare the /var/www directory.
     find /var/www -type f -exec sudo chmod 0664 {} +
 
 
-apache configuration.  also consider removing unnecessary modules.
+Apache configuration.
 
-sudo vim /etc/httpd/conf/httpd.conf
+    sudo vim /etc/httpd/conf/httpd.conf
 
 Embedded mode
 
+To run mod_wsgi in embedded mode, add the following lines to the end of httpd.conf:
+
+    WSGIScriptAlias /flasktest /var/www/wsgi-scripts/flask-db-test.wsgi
+
+    <Directory /var/www/wsgi-scripts>
+        Require all granted
+    </Directory>
+
 Daemon mode (recommended)
+
+To run mod_wsgi in daemon mode, also include these lines:
+
+    WSGIDaemonProcess dev \
+        processes=2 \
+        threads=15 \
+        stack-size=524288 \
+        maximum-requests=1000 \
+        display-name=%{GROUP}
+    WSGIProcessGroup dev
+
 
 ## PostgreSQL
 
@@ -61,7 +80,6 @@ Daemon mode (recommended)
     sudo vim /var/lib/pgsql/9.4/data/pg_hba.conf
     local   flasktestdb     flasktest   md5
 
-
     sudo systemctl restart postgresql-9.4
     sudo /bin/bash
     sudo -u postgres psql
@@ -78,19 +96,22 @@ No special installation necessary as it is packaged along with flask.
     sudo setenforce 0
     sudo chgrp apache .
 
+Warning: don't leave SELinux in permissive mode!
 
 
 ## Flask
 
-Virtualenv, git
+    # install git
+    sudo yum install git
 
+    # create a symlink to pg_config
+    sudo ln -s /usr/pgsql-9.4/bin/pg_config /usr/local/bin/pg_config
 
-sudo ln -s /usr/pgsql-9.4/bin/pg_config /usr/local/bin/pg_config
+    # set selinux contexts for apache to use psycopg2
+    sudo semanage fcontext -a -t httpd_sys_script_exec_t /var/www/apps/flask-db-test/venv/lib/python2.7/site-packages/psycopg2/_psycopg.so
+    sudo restorecon -v /var/www/apps/flask-db-test/venv/lib/python2.7/site-packages/psycopg2/_psycopg.so
 
-sudo semanage fcontext -a -t httpd_sys_script_exec_t /var/www/apps/flask-db-test/venv/lib/python2.7/site-packages/psycopg2/_psycopg.so
-sudo restorecon -v /var/www/apps/flask-db-test/venv/lib/python2.7/site-packages/psycopg2/_psycopg.so
-
-install flask-db-test
+Install flask-db-test
 
     cd /var/www/apps
     mkdir flask-db-test
@@ -105,26 +126,18 @@ install flask-db-test
 
 Edit or add new configuration files in local/.  To activate a config, create a symlink from config_live.py pointing to the desired config file.
 
-ln -s local/config_postgres.py config_live.py
+    ln -s local/config_postgres.py config_live.py
 
 Initialize the database.
 
-source venv/bin/activate
-python manage.py init_database
+    source venv/bin/activate
+    python manage.py init_database
 
-If all goes well, touch the wsgi script which will instruct modwsgi to reload the application.
+If all goes well, touch the wsgi script or reload apache which will instruct modwsgi to reload the application.
 
-touch ../../wsgi-scripts/flask-db-test.wsgi
+    # mod_wsgi in embedded mode
+    sudo systemctl restart httpd
 
-
-
-Setenforce 0
-Chown Apache app dev.db
-Chgrp Apache var www apps
-
-Setenforce 0
-Chown Apache app dev.db
-Chgrp Apache var www apps
-
-
+    # mod_wsgi in daemon mode
+    touch ../../wsgi-scripts/flask-db-test.wsgi
 
